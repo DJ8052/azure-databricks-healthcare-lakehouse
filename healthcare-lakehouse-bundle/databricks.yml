@@ -1,27 +1,29 @@
-# Declarative Automation Bundle configuration, more info here: https://docs.databricks.com/en/dev-tools/bundles/settings.html
+
+# Declarative Automation Bundle configuration
 bundle:
   name: "healthcare-lakehouse-bundle"
+
+sync:
+  paths:
+    - ..
 
 include:
   - resources/*.yml
   - resources/*/*.yml
 
 targets:
-  # The 'dev' target, for development purposes. This target is the default.
+  # Development target
   dev:
     mode: development
     default: true
     workspace:
       host: https://adb-7405608335516996.16.azuredatabricks.net
 
-  # The 'prod' target, used for production deployment.
+  # Production target - not deploying to this target
   prod:
     mode: production
     workspace:
       host: https://adb-7405608335516996.16.azuredatabricks.net
-      # We always use /Users/djjohnson@compliance314.onmicrosoft.com for all resources to make sure we only have a single copy.
       root_path: /Users/djjohnson@compliance314.onmicrosoft.com/.bundle/${bundle.name}/${bundle.target}
     run_as:
-      # This runs as djjohnson@compliance314.onmicrosoft.com in production. We could also use a service principal here,
-      # see https://docs.databricks.com/dev-tools/bundles/permissions.html.
       user_name: djjohnson@compliance314.onmicrosoft.com

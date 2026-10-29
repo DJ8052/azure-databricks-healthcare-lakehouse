@@ -1,0 +1,57 @@
+
+resources:
+  jobs:
+    healthcare_lakehouse_bundle_job:
+      name: healthcare_lakehouse_bundle_dev
+      tasks:
+        - task_key: diagnosis_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../../NB_Bronze_Diagnosis_AutoLoader
+
+        - task_key: diagnosis_silver-task
+          depends_on:
+            - task_key: diagnosis_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../../NB_Silver_Diagnosis_Merge
+
+        - task_key: hospitals_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../../NB_Bronze_Hospitals_AutoLoader
+
+        - task_key: dim_hospital_ingestion
+          depends_on:
+            - task_key: hospitals_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../../NB_Silver_Hospital_Merge
+
+        - task_key: patients_ingestion_task
+          notebook_task:
+            notebook_path: ../../NB_Bronze_Patients_AutoLoader
+
+        - task_key: dim_patient_ingestion
+          depends_on:
+            - task_key: patients_ingestion_task
+          notebook_task:
+            notebook_path: ../../NB_Silver_Patient_Merge
+
+        - task_key: visits_raw_ingestion_task
+          notebook_task:
+            notebook_path: ../../NB_Bronze_Visits_AutoLoader
+
+        - task_key: fact_visit_ingestion
+          depends_on:
+            - task_key: visits_raw_ingestion_task
+            - task_key: diagnosis_silver-task
+            - task_key: dim_hospital_ingestion
+            - task_key: dim_patient_ingestion
+          notebook_task:
+            notebook_path: ../../NB_Silver_Fact_Visit_Merge
+
+        - task_key: resubmission_analysis
+          depends_on:
+            - task_key: fact_visit_ingestion
+          notebook_task:
+            notebook_path: ../../NB_Gold_Hospital_Disease_KPI
+
+      queue:
+        enabled: true
